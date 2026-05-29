@@ -1,0 +1,59 @@
+.animated-button {
+  position: relative;
+  overflow: hidden;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 20px;
+  background-color: #6366f1;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 250px; /* Fixed width - stays the same on hover */
+  height: 55px; /* Fixed height - stays the same on hover */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box; /* Ensures padding is included in width/height */
+}
+
+.animated-button:hover {
+  background-color: #4f46e5;
+  /* No transform scale to maintain size */
+}
+
+.button-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.animated-svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.5s ease;
+}
+
+.animated-button:hover .animated-svg {
+  transform: translateX(12px);
+}
+
+/* Optional: Add a subtle background animation */
+.animated-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.animated-button:hover::before {
+  left: 100%;
+}
