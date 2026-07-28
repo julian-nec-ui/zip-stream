@@ -1,5 +1,5 @@
 import { useState, useEffect, useReducer } from "react";
-import { ShipWheelIcon } from "lucide-react";
+import { ListRestart, ShipWheelIcon } from "lucide-react";
 import { Link } from "react-router";
 import logo from "./video-call-animate-1.svg";
 import { motion } from "framer-motion";
@@ -25,6 +25,12 @@ const signupReducer = (state, action) => {
         showPassword: !state.showPassword
       };
 
+    case 'TOGGLE_CONFIRM_PASSWORD':
+      return {
+        ...state,
+        showConfirmPassword: !state.showConfirmPassword
+      };
+
     case 'SET_ERRORS':
       return {
         ...state,
@@ -47,7 +53,13 @@ const signupReducer = (state, action) => {
         errors: {},
         isSubmitting: false,
         termsAccepted: false,
-        showPassword: false
+        showPassword: false,
+        showConfirmPassword: false,
+        restrictedCharInPassword: false,
+        restrictedCharInConfirmPassword: false,
+        restrictedCharInName: false,
+        restrictedCharInLastName: false,
+        restrictedCharInEmail: false
       };
 
     default:
@@ -56,6 +68,10 @@ const signupReducer = (state, action) => {
 }
 
 const SignUpPage = () => {
+
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  const namesRegex = /^(?!.*[._,:<>';"`\\|~!@#$%^&*()=+-1234567890]).*$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/
 
   const [animationKey, setAnimationKey] = useState(0);
 
@@ -68,7 +84,8 @@ const SignUpPage = () => {
     errors: {},
     isSubmitting: false,
     termsAccepted: false,
-    showPassword: false
+    showPassword: false,
+    showConfirmPassword: false
   });
 
   useEffect(() => {
@@ -108,20 +125,22 @@ const SignUpPage = () => {
 
     if (!signupData.email) {
       newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(signupData.email)) {
+    } else if (emailRegex.test(signupData.email) === false) {
       newErrors.email = 'Email is invalid';
-    }
-
-    if (!signupData.password) {
-      newErrors.password = 'Password is required';
-    } else if (signupData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
     }
 
     if (!signupData.confirmPassword) {
       newErrors.confirmPassword = 'Confirm Password is required';
     } else if (signupData.confirmPassword !== signupData.password) {
       newErrors.confirmPassword = 'Passwords do not match';
+    } else if (passwordRegex.test(signupData.confirmPassword) === false) {
+      newErrors.confirmPassword = "Match pattern: min 8 chars, lower and upper case, digit, special char";
+    }
+
+    if (signupData.password && signupData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    } else if(passwordRegex.test(signupData.password) === false) {
+      newErrors.password = "Match pattern: min 8 chars, lower and upper case, digit, special char";
     }
 
     return newErrors;
@@ -180,7 +199,7 @@ const SignUpPage = () => {
           <div className="mb-4 flex items-center justify-start gap-2">
             <ShipWheelIcon className="size-9 text-primary" />
             <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
-              Streamify
+              ZipStream
             </span>
           </div>
 
@@ -215,6 +234,7 @@ const SignUpPage = () => {
                         value={signupData.firstName}
                         onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'firstName', value: e.target.value })}
                         required
+                        style={{ textTransform: 'capitalize' }}
                       />
                     </div>
 
@@ -229,6 +249,7 @@ const SignUpPage = () => {
                         value={signupData.lastName}
                         onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'lastName', value: e.target.value })}
                         required
+                        style={{ textTransform: 'capitalize' }}
                       />
                     </div>
                   </div>
@@ -240,13 +261,22 @@ const SignUpPage = () => {
                     </label>
                     <input
                       type="email"
-                      placeholder="john@gmail.com"
+                      placeholder="your email address ..."
                       className="input input-bordered w-full"
+                      style={{ fontSize: '.8rem' }}
                       value={signupData.email}
                       onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'email', value: e.target.value })}
                       required
                     />
                   </div>
+
+                  {
+                    signupData.errors.email && (
+                      <p className="text-xs text-red-500 opacity-70 mt-2">
+                      {signupData.errors.email}
+                    </p>
+                    )
+                  }
 
                   {/* PASSWORD */}
                   <div className="form-control relative align-center w-full">
@@ -255,26 +285,31 @@ const SignUpPage = () => {
                     </label>
                     <input
                       type={signupData.showPassword ? 'text' : 'password'}
-                      placeholder="at least 6 characters..."
-                      className="input input-bordered w-full" 
-                      style={{ 
-                        border: !signupData.password  ? '' : ( signupData.password !== signupData.confirmPassword) ? '1px solid #FF0000' : '1px solid #1ADA1A', 
-                        color: (signupData.password && signupData.password.length < 6) || (signupData.password !== signupData.confirmPassword) ?  '#FF0000' : (signupData.password && signupData.password.length > 5) ? '#1ADA1A' : ''
-                       }}
+                      placeholder="min 8 chars, upper & lower case, digit, and special char"
+                      className="input input-bordered w-full"
+                      style={{
+                        fontSize: '.8rem',
+                        border: !signupData.password ? '' : ((signupData.password && signupData.password.length < 8) || (passwordRegex.test(signupData.password) === false)) ? '1px solid #FF0000' : '1px solid #1ADA1A',
+                        color: (signupData.password && signupData.password.length < 8) || (signupData.password !== signupData.confirmPassword) ? '#FF0000' : (signupData.password && signupData.password.length > 5) ? '#1ADA1A' : ''
+                      }}
                       value={signupData.password}
                       onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'password', value: e.target.value })}
                       required
                     />
                     <span className="wrap-span" onClick={() => dispatch({ 'type': 'TOGGLE_PASSWORD' })}>
-                      {signupData.showPassword ? <FaEyeSlash style={{ width: "20px", height: "20px" }} /> : <FaEye style={{ width: "20px", height: "20px" }} />}
+                      {signupData.showPassword ? <FaEyeSlash style={{ width: "23px", height: "23px" }} /> : <FaEye style={{ width: "23px", height: "23px" }} />}
                     </span>
-
-                    {signupData.errors.password && (
-                      <p className="text-xs text-red-500 opacity-70 mt-2">
-                        Password must be at least 6 characters long
-                      </p>)
-                    }
                   </div>
+
+                  {signupData.errors.password && (
+                    // <div className="alert alert-error p-2">
+                    //   <span style={{ fontSize: '.75rem' }}>{signupData.errors.password}</span>
+                    // </div>
+                    <p className="text-xs text-red-500 opacity-70 mt-2">
+                      {signupData.errors.password}
+                    </p>
+                  )
+                  }
 
                   {/* CONFIRM PASSWORD */}
                   <div className="form-control relative align-center w-full">
@@ -282,43 +317,64 @@ const SignUpPage = () => {
                       <span className="label-text">Confirm Password</span>
                     </label>
                     <input
-                      type={signupData.showPassword ? 'text' : 'password'}
+                      type={signupData.showConfirmPassword ? 'text' : 'password'}
                       placeholder="confirm password..."
                       className="input input-bordered w-full"
-                      style={{ border: !signupData.confirmPassword  ? '' : signupData.confirmPassword && signupData.confirmPassword !== signupData.password ? '1px solid #FF0000' : '1px solid #1ADA1A', color: `${signupData.password && signupData.password !== signupData.confirmPassword ? '#FF0000' : '#1ADA1A'}` }}
+                      style={{ 
+                        border: !signupData.confirmPassword ? '' : ((signupData.confirmPassword && signupData.confirmPassword.length < 8) || (passwordRegex.test(signupData.confirmPassword) === false)) ? '1px solid #FF0000' : '1px solid #1ADA1A',
+                        color: ((passwordRegex.test(signupData.confirmPassword) === false) || (signupData.confirmPassword !== signupData.password)) ? '#FF0000' : '#1ADA1A',
+                        fontSize: '.8rem'
+                      }}
                       value={signupData.confirmPassword}
                       onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'confirmPassword', value: e.target.value })}
                       required
                     />
-                    <span className="wrap-span" onClick={() => dispatch({ 'type': 'TOGGLE_PASSWORD' })}>
-                      {signupData.showPassword ? <FaEyeSlash style={{ width: "20px", height: "20px" }} /> : <FaEye style={{ width: "20px", height: "20px" }} />}
+                    <span className="wrap-span" onClick={() => dispatch({ 'type': 'TOGGLE_CONFIRM_PASSWORD' })}>
+                      {signupData.showConfirmPassword ? <FaEyeSlash style={{ width: "23px", height: "23px" }} /> : <FaEye style={{ width: "23px", height: "23px" }} />}
                     </span>
-
-                    {signupData.errors.confirmPassword && (
-                      <p className="text-xs text-red-500 opacity-70 mt-2">
-                        Passwords do not match
-                      </p>)
-                    }
                   </div>
+
+                  {signupData.errors.confirmPassword && (
+                    <p className="text-xs text-red-500 opacity-70 mt-2">
+                      {signupData.errors.confirmPassword}
+                    </p>)
+                  }
 
                   {/** accept terms */}
-                  <div className="form-control hover:cursor-pointer">
-                    <label className="label cursor-pointer justify-start gap-2">
-                      <input type="checkbox" checked={signupData.termsAccepted} className="checkbox checkbox-sm" 
-                      style={{ 
-                        width: "27px", 
-                        height: "27px",
-                        border: "1px solid #7EA1FA", 
-                        opacity: signupData.termsAccepted ? 1 : 0.3 
-                      }} 
-                        onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'termsAccepted', value: e.target.checked })} required />
-                      <span className="text-xs leading-tight">
-                        I agree to the{" "}
-                        <span className="text-primary hover:underline">terms of service</span> and{" "}
-                        <span className="text-primary hover:underline">privacy policy</span>
+                  <div className="flex flex-direction:row items-center justify-between pt-1">
+                    <div className="form-control hover:cursor-pointer">
+                      <label className="label cursor-pointer justify-start gap-2">
+                        <input type="checkbox" checked={signupData.termsAccepted} className="checkbox checkbox-sm"
+                          style={{
+                            width: "27px",
+                            height: "27px",
+                            border: "1px solid #7EA1FA",
+                            opacity: signupData.termsAccepted ? 1 : 0.3
+                          }}
+                          onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'termsAccepted', value: e.target.checked })} required />
+                        <span className="text-xs leading-tight">
+                          I agree to the{" "}
+                          <span className="text-primary hover:underline">terms of service</span> and{" "}
+                          <span className="text-primary hover:underline">privacy policy</span>
+                        </span>
+                      </label>
+
+
+                    </div>
+                    <div className="flex items-center">
+
+                      <span className="flex align-content-center items-center hover:text-[#de0655] hover:cursor-pointer">
+                        <button style={{ fontWeight: "normal", fontSize: "15px" }}
+                          className="btn btn-xs btn-ghost bg-transparent hover:bg-transparent"
+                          type="button"
+                          onClick={() => dispatch({ type: 'RESET_FORM' })}>
+                          <ListRestart className="w-3 h-3" />
+                          Reset Form
+                        </button>
                       </span>
-                    </label>
+                    </div>
                   </div>
+
                 </div>
 
                 <button className="btn btn-primary w-full" type="submit">
