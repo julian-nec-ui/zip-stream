@@ -2,6 +2,7 @@
 /node_modules
 /.pnp
 .pnp.js
+package-lock.json
 
 # Testing
 /coverage
@@ -23,6 +24,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # IDE/System Files
-.vscode/
+.vscode/*
 .idea/
 .DS_Store

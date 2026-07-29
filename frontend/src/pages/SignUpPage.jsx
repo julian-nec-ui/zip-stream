@@ -65,14 +65,15 @@ const signupReducer = (state, action) => {
     default:
       return state;
   }
-}
+};
 
 const SignUpPage = () => {
 
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  const namesRegex = /^(?!.*[._,:<>';"`\\|~!@#$%^&*()=+-1234567890]).*$/;
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/
-
+  //const namesRegex = /^(?!.*\[._,:<>';"`\\|~!@#$%^&*()=+-1234567890]).*$/;
+  const namesRegex = /^[a-zA-Z]['a-zA-Z- ]*$/;
+  //const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const [animationKey, setAnimationKey] = useState(0);
 
   const [signupData, dispatch] = useReducer(signupReducer, {
@@ -117,10 +118,14 @@ const SignUpPage = () => {
 
     if (!signupData.firstName.trim()) {
       newErrors.firstName = 'First name is required';
+    } else if (namesRegex.test(signupData.firstName) === false) {
+      newErrors.firstName = 'First name cannot contain digits or special chars';
     }
 
     if (!signupData.lastName.trim()) {
       newErrors.lastName = 'Last name is required';
+    } else if (namesRegex.test(signupData.lastName) === false) {
+      newErrors.lastName = 'Last name cannot contain digits or special chars';
     }
 
     if (!signupData.email) {
@@ -139,7 +144,7 @@ const SignUpPage = () => {
 
     if (signupData.password && signupData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters';
-    } else if(passwordRegex.test(signupData.password) === false) {
+    } else if (passwordRegex.test(signupData.password) === false) {
       newErrors.password = "Match pattern: min 8 chars, lower and upper case, digit, special char";
     }
 
@@ -147,9 +152,9 @@ const SignUpPage = () => {
   };
 
   const submitFields = (data) => ({
-    firstName: data.firstName,
-    lastName: data.lastName,
-    email: data.email,
+    firstName: data.firstName.trim(),
+    lastName: data.lastName.trim(),
+    email: data.email.trim(),
     password: data.password
   });
 
@@ -227,6 +232,7 @@ const SignUpPage = () => {
                       <label className="label">
                         <span className="label-text">First Name</span>
                       </label>
+
                       <input
                         type="text"
                         placeholder="First Name"
@@ -234,8 +240,12 @@ const SignUpPage = () => {
                         value={signupData.firstName}
                         onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'firstName', value: e.target.value })}
                         required
-                        style={{ textTransform: 'capitalize' }}
+                        style={{
+                          textTransform: 'capitalize',
+                          border: ((namesRegex.test(signupData.firstName) === false) && signupData.firstName.length > 0) ? '1px solid #FF0000' : signupData.firstName.length === 0 ? '' : '1px solid #1ADA1A',
+                        }}
                       />
+
                     </div>
 
                     <div className="form-control w-full">
@@ -249,10 +259,30 @@ const SignUpPage = () => {
                         value={signupData.lastName}
                         onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'lastName', value: e.target.value })}
                         required
-                        style={{ textTransform: 'capitalize' }}
+                        style={{
+                          textTransform: 'capitalize',
+                          border: ((namesRegex.test(signupData.lastName) === false) && signupData.lastName.length > 0) ? '1px solid #FF0000' : signupData.lastName.length === 0 ? '' : '1px solid #1ADA1A',
+                        }}
                       />
+
                     </div>
+
                   </div>
+                  {
+                    signupData.errors.firstName && (
+                      <p className="text-xs text-red-500 opacity-70 mt-2">
+                        {signupData.errors.firstName}
+                      </p>
+                    )
+                  }
+
+                  {
+                    signupData.errors.lastName && (
+                      <p className="text-xs text-red-500 opacity-70 mt-2">
+                        {signupData.errors.lastName}
+                      </p>
+                    )
+                  }
 
                   {/* EMAIL */}
                   <div className="form-control w-full">
@@ -263,7 +293,10 @@ const SignUpPage = () => {
                       type="email"
                       placeholder="your email address ..."
                       className="input input-bordered w-full"
-                      style={{ fontSize: '.8rem' }}
+                      style={{
+                        fontSize: '.8rem',
+                        border: (((emailRegex.test(signupData.email) === false) && signupData.email.length > 0) || (signupData.email.charAt(0) === ' ' || signupData.email.charAt(signupData.email.length) === ' ' )) ? '1px solid #FF0000' : signupData.email.length === 0 ? '' : '1px solid #1ADA1A',
+                      }}
                       value={signupData.email}
                       onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'email', value: e.target.value })}
                       required
@@ -273,8 +306,8 @@ const SignUpPage = () => {
                   {
                     signupData.errors.email && (
                       <p className="text-xs text-red-500 opacity-70 mt-2">
-                      {signupData.errors.email}
-                    </p>
+                        {signupData.errors.email}
+                      </p>
                     )
                   }
 
@@ -294,10 +327,13 @@ const SignUpPage = () => {
                       }}
                       value={signupData.password}
                       onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'password', value: e.target.value })}
+                      onCopy={(e) => e.preventDefault()}
+                      onPaste={(e) => e.preventDefault()}
+                      onCut={(e) => e.preventDefault()}
                       required
                     />
                     <span className="wrap-span" onClick={() => dispatch({ 'type': 'TOGGLE_PASSWORD' })}>
-                      {signupData.showPassword ? <FaEyeSlash style={{ width: "23px", height: "23px" }} /> : <FaEye style={{ width: "23px", height: "23px" }} />}
+                      {signupData.showPassword ? <FaEyeSlash style={{ width: "1.3rem", height: "1.5rem", color: "#8ecbff" }} /> : <FaEye style={{ width: "1.3rem", height: "1.3rem" }} />}
                     </span>
                   </div>
 
@@ -320,17 +356,20 @@ const SignUpPage = () => {
                       type={signupData.showConfirmPassword ? 'text' : 'password'}
                       placeholder="confirm password..."
                       className="input input-bordered w-full"
-                      style={{ 
+                      style={{
                         border: !signupData.confirmPassword ? '' : ((signupData.confirmPassword && signupData.confirmPassword.length < 8) || (passwordRegex.test(signupData.confirmPassword) === false)) ? '1px solid #FF0000' : '1px solid #1ADA1A',
                         color: ((passwordRegex.test(signupData.confirmPassword) === false) || (signupData.confirmPassword !== signupData.password)) ? '#FF0000' : '#1ADA1A',
                         fontSize: '.8rem'
                       }}
                       value={signupData.confirmPassword}
                       onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'confirmPassword', value: e.target.value })}
+                      onCopy={(e) => e.preventDefault()}
+                      onPaste={(e) => e.preventDefault()}
+                      onCut={(e) => e.preventDefault()}
                       required
                     />
                     <span className="wrap-span" onClick={() => dispatch({ 'type': 'TOGGLE_CONFIRM_PASSWORD' })}>
-                      {signupData.showConfirmPassword ? <FaEyeSlash style={{ width: "23px", height: "23px" }} /> : <FaEye style={{ width: "23px", height: "23px" }} />}
+                      {signupData.showConfirmPassword ? <FaEyeSlash style={{ width: "1.3rem", height: "1.3rem", color: "#8ecbff" }} /> : <FaEye style={{ width: "1.3rem", height: "1.3rem" }} />}
                     </span>
                   </div>
 
@@ -346,8 +385,8 @@ const SignUpPage = () => {
                       <label className="label cursor-pointer justify-start gap-2">
                         <input type="checkbox" checked={signupData.termsAccepted} className="checkbox checkbox-sm"
                           style={{
-                            width: "27px",
-                            height: "27px",
+                            width: "1.3rem",
+                            height: "1.3rem",
                             border: "1px solid #7EA1FA",
                             opacity: signupData.termsAccepted ? 1 : 0.3
                           }}
@@ -364,7 +403,7 @@ const SignUpPage = () => {
                     <div className="flex items-center">
 
                       <span className="flex align-content-center items-center hover:text-[#de0655] hover:cursor-pointer">
-                        <button style={{ fontWeight: "normal", fontSize: "15px" }}
+                        <button style={{ fontWeight: "normal", fontSize: ".7rem" }}
                           className="btn btn-xs btn-ghost bg-transparent hover:bg-transparent"
                           type="button"
                           onClick={() => dispatch({ type: 'RESET_FORM' })}>
