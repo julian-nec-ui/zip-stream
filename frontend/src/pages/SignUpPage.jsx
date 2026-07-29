@@ -323,7 +323,12 @@ const SignUpPage = () => {
                       style={{
                         fontSize: '.8rem',
                         border: !signupData.password ? '' : ((signupData.password && signupData.password.length < 8) || (passwordRegex.test(signupData.password) === false)) ? '1px solid #FF0000' : '1px solid #1ADA1A',
-                        color: (signupData.password && signupData.password.length < 8) || (signupData.password !== signupData.confirmPassword) ? '#FF0000' : (signupData.password && signupData.password.length > 5) ? '#1ADA1A' : ''
+                        color: 
+                          (signupData.password && signupData.password.length < 8) || 
+                          (signupData.password !== signupData.confirmPassword) || 
+                          (passwordRegex.test(signupData.password) === false) ? 
+                          '#FF0000' : ((passwordRegex.test(signupData.password) === true)) ?
+                          '#1ADA1A' : '#AFB6BE'
                       }}
                       value={signupData.password}
                       onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'password', value: e.target.value })}
@@ -341,7 +346,7 @@ const SignUpPage = () => {
                     // <div className="alert alert-error p-2">
                     //   <span style={{ fontSize: '.75rem' }}>{signupData.errors.password}</span>
                     // </div>
-                    <p className="text-xs text-red-500 opacity-70 mt-2">
+                    <p className="text-xs text-[#FF0000] opacity-70 mt-2">
                       {signupData.errors.password}
                     </p>
                   )
@@ -357,7 +362,11 @@ const SignUpPage = () => {
                       placeholder="confirm password..."
                       className="input input-bordered w-full"
                       style={{
-                        border: !signupData.confirmPassword ? '' : ((signupData.confirmPassword && signupData.confirmPassword.length < 8) || (passwordRegex.test(signupData.confirmPassword) === false)) ? '1px solid #FF0000' : '1px solid #1ADA1A',
+                        border: !signupData.confirmPassword ? 
+                        '' : 
+                        ((signupData.confirmPassword && signupData.confirmPassword.length < 8) ||
+                        (passwordRegex.test(signupData.confirmPassword) === false)) ? 
+                        '1px solid #FF0000' : '1px solid #1ADA1A',
                         color: ((passwordRegex.test(signupData.confirmPassword) === false) || (signupData.confirmPassword !== signupData.password)) ? '#FF0000' : '#1ADA1A',
                         fontSize: '.8rem'
                       }}
@@ -374,7 +383,7 @@ const SignUpPage = () => {
                   </div>
 
                   {signupData.errors.confirmPassword && (
-                    <p className="text-xs text-red-500 opacity-70 mt-2">
+                    <p className="text-xs text-[#ff0000] opacity-70 mt-2">
                       {signupData.errors.confirmPassword}
                     </p>)
                   }

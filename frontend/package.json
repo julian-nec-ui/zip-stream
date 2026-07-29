@@ -20,7 +20,7 @@
     "react-dom": "^19.2.6",
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.6.0",
-    "react-router": "^7.15.0",
+    "react-router": "^8.3.0",
     "react-toastify": "^11.1.0",
     "scichart": "^5.2.11",
     "scichart-react": "^1.0.0",
@@ -38,7 +38,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
     "init": "^0.1.2",
-    "npx": "^3.0.0",
+    "npx": "^10.2.2",
     "postcss": "^8.5.14",
     "tailwindcss": "^3.4.19",
     "vite": "^8.0.10"
