@@ -8,5 +8,11 @@
     "tab.unfocusedActiveForeground": "#FFA500",
     "tab.unfocusedInactiveForeground": "#91c8e2"
   },
-  "git.decorations.enabled": true
+  "git.decorations.enabled": true,
+  "emmet.showSuggestionsAsSnippets": true,
+  "emmet.triggerExpansionOnTab": true,
+  "emmet.useInlineCompletions": false,
+  "emmet.variables": {
+    "lang": "en"
+  }
 }

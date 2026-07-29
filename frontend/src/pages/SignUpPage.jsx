@@ -5,7 +5,8 @@ import logo from "./video-call-animate-1.svg";
 import { motion } from "framer-motion";
 import useSignUp from "../hooks/useSignUp";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-
+import TermsAndConditions from "../components/modals/TermsAndConditions";
+import PrivacyPolicyModal from "../components/modals/PrivacyPolicyModal";
 const signupReducer = (state, action) => {
   switch (action.type) {
 
@@ -69,6 +70,9 @@ const signupReducer = (state, action) => {
 
 const SignUpPage = () => {
 
+  const [openTerms, setOpenTerms] = useState(false);
+  const [openPrivacyPolicy, setOpenPrivacyPolicy] = useState(false);
+
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   //const namesRegex = /^(?!.*\[._,:<>';"`\\|~!@#$%^&*()=+-1234567890]).*$/;
   const namesRegex = /^[a-zA-Z]['a-zA-Z- ]*$/;
@@ -98,7 +102,7 @@ const SignUpPage = () => {
 
       interval = setTimeout(() => {
         setAnimationKey((prevKey) => prevKey + 1);
-      }, 200);
+      }, 100);
     };
 
     window.addEventListener("resize", handleResize);
@@ -112,6 +116,7 @@ const SignUpPage = () => {
 
   // This is how we did it using our custom hook - optimized version
   const { isPending, error, signupMutation } = useSignUp();
+
 
   const validate = () => {
     const newErrors = {};
@@ -158,6 +163,17 @@ const SignUpPage = () => {
     password: data.password
   });
 
+  const handleAgreement = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpenTerms(true);
+  };
+
+  const handlePrivacyPolicy = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpenPrivacyPolicy(true);
+  };
   const handleSignup = (e) => {
 
     e.preventDefault();
@@ -295,7 +311,7 @@ const SignUpPage = () => {
                       className="input input-bordered w-full"
                       style={{
                         fontSize: '.8rem',
-                        border: (((emailRegex.test(signupData.email) === false) && signupData.email.length > 0) || (signupData.email.charAt(0) === ' ' || signupData.email.charAt(signupData.email.length) === ' ' )) ? '1px solid #FF0000' : signupData.email.length === 0 ? '' : '1px solid #1ADA1A',
+                        border: (((emailRegex.test(signupData.email) === false) && signupData.email.length > 0) || (signupData.email.charAt(0) === ' ' || signupData.email.charAt(signupData.email.length) === ' ')) ? '1px solid #FF0000' : signupData.email.length === 0 ? '' : '1px solid #1ADA1A',
                       }}
                       value={signupData.email}
                       onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'email', value: e.target.value })}
@@ -323,12 +339,12 @@ const SignUpPage = () => {
                       style={{
                         fontSize: '.8rem',
                         border: !signupData.password ? '' : ((signupData.password && signupData.password.length < 8) || (passwordRegex.test(signupData.password) === false)) ? '1px solid #FF0000' : '1px solid #1ADA1A',
-                        color: 
-                          (signupData.password && signupData.password.length < 8) || 
-                          (signupData.password !== signupData.confirmPassword) || 
-                          (passwordRegex.test(signupData.password) === false) ? 
-                          '#FF0000' : ((passwordRegex.test(signupData.password) === true)) ?
-                          '#1ADA1A' : '#AFB6BE'
+                        color:
+                          (signupData.password && signupData.password.length < 8) ||
+                            (signupData.password !== signupData.confirmPassword) ||
+                            (passwordRegex.test(signupData.password) === false) ?
+                            '#FF0000' : ((passwordRegex.test(signupData.password) === true)) ?
+                              '#1ADA1A' : '#AFB6BE'
                       }}
                       value={signupData.password}
                       onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'password', value: e.target.value })}
@@ -362,11 +378,11 @@ const SignUpPage = () => {
                       placeholder="confirm password..."
                       className="input input-bordered w-full"
                       style={{
-                        border: !signupData.confirmPassword ? 
-                        '' : 
-                        ((signupData.confirmPassword && signupData.confirmPassword.length < 8) ||
-                        (passwordRegex.test(signupData.confirmPassword) === false)) ? 
-                        '1px solid #FF0000' : '1px solid #1ADA1A',
+                        border: !signupData.confirmPassword ?
+                          '' :
+                          ((signupData.confirmPassword && signupData.confirmPassword.length < 8) ||
+                            (passwordRegex.test(signupData.confirmPassword) === false)) ?
+                            '1px solid #FF0000' : '1px solid #1ADA1A',
                         color: ((passwordRegex.test(signupData.confirmPassword) === false) || (signupData.confirmPassword !== signupData.password)) ? '#FF0000' : '#1ADA1A',
                         fontSize: '.8rem'
                       }}
@@ -390,7 +406,7 @@ const SignUpPage = () => {
 
                   {/** accept terms */}
                   <div className="flex flex-direction:row items-center justify-between pt-1">
-                    <div className="form-control hover:cursor-pointer">
+                    <div className="form-control flex hover:cursor-pointer">
                       <label className="label cursor-pointer justify-start gap-2">
                         <input type="checkbox" checked={signupData.termsAccepted} className="checkbox checkbox-sm"
                           style={{
@@ -402,12 +418,17 @@ const SignUpPage = () => {
                           onChange={(e) => dispatch({ type: 'UPDATE_FIELD', field: 'termsAccepted', value: e.target.checked })} required />
                         <span className="text-xs leading-tight">
                           I agree to the{" "}
-                          <span className="text-primary hover:underline">terms of service</span> and{" "}
-                          <span className="text-primary hover:underline">privacy policy</span>
+                          <span className="text-primary hover:underline" onClick={(e) => handleAgreement(e)}>terms and conditions</span> and{" "}
+                          <span className="text-primary hover:underline" onClick={(e) => handlePrivacyPolicy(e)}>privacy policy</span>
                         </span>
                       </label>
 
-
+                      {/* terms and conditions popup */}
+                        <TermsAndConditions isOpen={openTerms} onClose={() => setOpenTerms(false)} />
+                      {/* privacy policy popup */}
+                      <PrivacyPolicyModal isOpen={openPrivacyPolicy} onClose={() => setOpenPrivacyPolicy(false)} />
+                      
+                      
                     </div>
                     <div className="flex items-center">
 

@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "./lib/axios.js";
 import SignupPage from "./pages/border-animation/signup.jsx";
 import NavBar from "./pages/nav-bar/NavBar.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
 // import Register from "./components/Register.jsx";
 
 function App() {
@@ -36,7 +37,8 @@ function App() {
         <Route path="/chat" element={authUser ? <ChatPage /> : <Navigate to="/login" />} />
         <Route path="/onboarding" element={authUser ? <OnboardingPage /> : <Navigate to="/login" />} /> */}
           <Route path="/" element={<HomePage />} />
-          <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/login" element={<LoginPage />} />
           <Route path="/navbar" element={<NavBar />} />
           {/* <Route path="/register" element={<Register />} /> */}
 
